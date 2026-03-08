@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import {
   commentSchema,
   updateCommentSchema,
@@ -104,6 +104,7 @@ export async function addComment(input: CommentInput) {
     revalidateTag(`comments-${parsed.data.postId}`, "max");
     revalidateTag(`stats-${parsed.data.postId}`, "max");
     revalidateTag("comments", "max");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch {
     return { success: false, message: "Failed to post comment." };
@@ -145,6 +146,7 @@ export async function editComment(input: UpdateCommentInput) {
     revalidateTag(`comments-${comment.postId}`, "max");
     revalidateTag(`stats-${comment.postId}`, "max");
     revalidateTag("comments", "max");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch {
     return { success: false, message: "Failed to edit comment." };
@@ -200,6 +202,7 @@ export async function reportComment(input: ReportCommentInput) {
       },
     });
     revalidateTag("comments", "max");
+    revalidatePath("/", "layout");
     return {
       success: true,
       message: "Comment reported. Thank you for keeping the community safe.",
@@ -230,6 +233,7 @@ export async function deleteComment(commentId: string) {
     revalidateTag(`comments-${comment.postId}`, "max");
     revalidateTag("comments", "max");
     revalidateTag(`stats-${comment.postId}`, "max");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch {
     return { success: false, message: "Failed to delete comment." };

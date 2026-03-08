@@ -50,7 +50,7 @@ export const signupAction = async (data: signupData) => {
   //send verification email logic here
   // const verificationToken = await generateVerificationToken(email);
   // sendVerificationEmail(verificationToken.email, verificationToken.token);
-  sendVerificationMail(email);
+  await sendVerificationMail(email);
   return {
     success: true,
     message: "Verification Email sent.",

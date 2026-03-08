@@ -33,6 +33,6 @@ export const sendVerificationMail = async (email: string) => {
   }
 
   const verificationToken = await generateVerificationToken(email);
-  sendVerificationEmail(verificationToken.email, verificationToken.token);
+  await sendVerificationEmail(verificationToken.email, verificationToken.token);
   return { success: true, message: "Verification email sent!" };
 };

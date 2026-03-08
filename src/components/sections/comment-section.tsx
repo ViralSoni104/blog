@@ -61,7 +61,7 @@ import {
 } from "@tabler/icons-react";
 import { cn, getInitials, getRelativeTime } from "@/lib/utils";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   Select,
@@ -145,6 +145,7 @@ function CommentContent({ postId, initialComments }: CommentSectionProps) {
   const [isPending, startTransition] = useTransition();
   const pathname = usePathname();
   const posthog = usePostHog();
+  const router = useRouter();
   const form = useForm<CommentInput>({
     resolver: zodResolver(commentSchema),
     defaultValues: { content: "", postId, parentId: null },
@@ -168,6 +169,7 @@ function CommentContent({ postId, initialComments }: CommentSectionProps) {
       if (res.success) {
         toast.success("Comment posted!", { position: "top-center" });
         form.reset();
+        router.refresh();
         posthog.capture("comment_posted", {
           article_id: postId,
           is_reply: false,
@@ -312,6 +314,7 @@ function ThreadItem({
   const [showReplies, setShowReplies] = useState(false);
   const [isPending, startTransition] = useTransition();
   const posthog = usePostHog();
+  const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { data: session } = useSession();
   const isLoggedIn = !!session?.user;
@@ -343,6 +346,7 @@ function ThreadItem({
       const res = await addComment(data);
       if (res.success) {
         replyForm.reset();
+        router.refresh();
         setIsReplying(false);
         setShowReplies(true);
         posthog.capture("comment_posted", {
@@ -489,6 +493,7 @@ function CommentCard({
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { data: session } = useSession();
+  const router = useRouter();
   const isLoggedIn = !!session?.user;
   const currentUserId = session?.user?.id;
   const isOwner = currentUserId === data.user.id;
@@ -511,6 +516,7 @@ function CommentCard({
       const res = await editComment(values);
       if (res.success) {
         setIsEditing(false);
+        router.refresh();
         toast.success("Comment updated!", { position: "top-center" });
       } else toast.error(res.message, { position: "top-center" });
     });
@@ -585,6 +591,7 @@ function CommentCard({
                     <DropdownMenuItem
                       onClick={() => {
                         deleteComment(data.id);
+                        router.refresh();
                         toast.success("Comment deleted!", {
                           position: "top-center",
                         });

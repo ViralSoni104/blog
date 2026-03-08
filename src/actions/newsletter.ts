@@ -43,7 +43,7 @@ export const subscribeAction = async (values: NewsletterSubscribeData) => {
       if (result.status === "ALREADY_ACTIVE") {
         return { success: true, message: "You're already on the list!" };
       }
-      sendWelcomeEmail(result.data.email, result.data.token);
+      await sendWelcomeEmail(result.data.email, result.data.token);
       return { success: true, message: "Thank you for subscribing!" };
     }
   } catch {

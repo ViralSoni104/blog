@@ -17,7 +17,7 @@ async function DashboardLoader() {
 
   // Kick out non-admins
   if (!session?.user || session.user.role !== "ADMIN") {
-    redirect("/auth/login");
+    redirect("/");
   }
 
   const stats = await getDashboardAnalytics();

@@ -41,6 +41,7 @@ function LoginFormContent() {
   const { update } = useSession();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
+  console.log("callbackurl  --- ---- --- ", callbackUrl);
   const urlError =
     searchParams.get("error") === "OAuthAccountNotLinked"
       ? "Email already in use with different provider!"

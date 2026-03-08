@@ -127,7 +127,7 @@ export function ArticleCard({
         "hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5",
         "rounded-2xl md:rounded-3xl",
         // In grid mode, we use flex-col. In list mode, we use flex-row with padding
-        variant === "grid" ? "flex-col" : "flex-col md:flex-row p-3 gap-5",
+        variant === "grid" ? "flex-col" : "flex-col md:flex-row gap-2 md:gap-5",
       )}
     >
       <BorderBeam
@@ -140,10 +140,9 @@ export function ArticleCard({
       <div
         className={cn(
           "relative shrink-0 overflow-hidden bg-muted/30",
-          variant === "grid" &&
-            "aspect-[16/10] w-full border-b border-border/10",
-          variant === "list" &&
-            "aspect-video md:w-1/3 rounded-xl md:rounded-2xl border border-border/20",
+          variant === "grid"
+            ? "aspect-[16/10] w-full border-b border-border/10"
+            : "aspect-video w-full md:aspect-auto md:w-2/5 border-b md:border-b-0 md:border-r border-border/10",
         )}
       >
         <Image
@@ -160,7 +159,7 @@ export function ArticleCard({
       <div
         className={cn(
           "flex flex-1 flex-col",
-          variant === "grid" ? "p-4 md:p-6" : "py-2 pr-2",
+          variant === "grid" ? "p-4 md:p-6" : "py-2 pr-2 md:px-0 px-3",
         )}
       >
         {/* Meta Info */}
