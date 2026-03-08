@@ -17,6 +17,17 @@ export default auth((req) => {
   // 💡 SECURITY FIX: Always use req.auth.
   // Manually parsing cookies bypasses JWT signature validation and creates a severe vulnerability.
   const isLoggedIn = !!req.auth;
+  const role = req.auth?.user?.role;
+
+  const isProtectedAdminRoute = nextUrl.pathname.startsWith("/admin");
+
+  // 2. The Bouncer: Kick them out if they aren't an ADMIN
+  if (isProtectedAdminRoute) {
+    if (!isLoggedIn || role !== "ADMIN") {
+      // Redirect to login page
+      return NextResponse.redirect(new URL("/auth/login", nextUrl));
+    }
+  }
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
