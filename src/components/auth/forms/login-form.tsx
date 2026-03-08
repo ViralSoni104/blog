@@ -145,7 +145,7 @@ function LoginFormContent() {
       backButtonSubLabel="Don't have an account?"
       backButtonMainLabel=" Sign up"
       backButtonHref="/auth/signup"
-      // showSocial
+      showSocial
       pageName={showTwoFactor ? "Verification Code" : "Login"}
     >
       <form onSubmit={handleSubmit} className="space-y-4">

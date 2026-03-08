@@ -82,7 +82,7 @@ const CardWrapperContent = ({
         {/* Social Buttons Section */}
         {showSocial && (
           <>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-1 xl:grid-cols-1 gap-3 mb-6">
               {socialMediaButtons.map((o) => (
                 <Button
                   key={o.label}

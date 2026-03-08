@@ -57,12 +57,15 @@ export const navItems = [
   },
 ];
 
+{
+  /** In Auth Card Set xl:grid-cols-2 for github as well */
+}
 export const socialMediaButtons = [
-  {
-    icon: IconBrandGithubFilled,
-    label: "Continue with Github",
-    type: "Github",
-  },
+  // {
+  //   icon: IconBrandGithubFilled,
+  //   label: "Continue with Github",
+  //   type: "Github",
+  // },
   {
     icon: IconBrandGoogleFilled,
     label: "Continue with Google",
