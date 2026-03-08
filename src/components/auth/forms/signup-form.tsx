@@ -74,7 +74,7 @@ export function SignupForm() {
       backButtonSubLabel="Already have an account?"
       backButtonMainLabel=" Login"
       backButtonHref="/auth/login"
-      showSocial
+      // showSocial
       pageName="Signup"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
