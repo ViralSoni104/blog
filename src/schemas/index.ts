@@ -3,18 +3,22 @@ import { Category, Prisma } from "@/generated/prisma/client";
 
 export type NewsletterSubscribeData = z.infer<typeof NewsletterSubscribeSchema>;
 export const NewsletterSubscribeSchema = z.object({
-  email: z.email({ message: "Please enter a valid email" }),
-  fax: z.string().optional(),
+  email: z.email({ message: "Please enter a valid email" }).max(255),
+  fax: z.string().max(50).optional(),
 });
 
 export type ContactFormData = z.infer<typeof ContactFormSchema>;
 export const ContactFormSchema = z.object({
-  name: z.string().min(3, { message: "Name must be at least 3 characters." }),
-  email: z.email({ message: "Please enter a valid email address." }),
+  name: z
+    .string()
+    .min(3, { message: "Name must be at least 3 characters." })
+    .max(100, { message: "Name can't be this long!" }),
+  email: z.email({ message: "Please enter a valid email address." }).max(255),
   message: z
     .string()
-    .min(10, { message: "Message must be at least 10 characters." }),
-  fax: z.string().optional(),
+    .min(10, { message: "Message must be at least 10 characters." })
+    .max(5000, { message: "Message is too long." }),
+  fax: z.string().max(50).optional(),
 });
 
 export const SettingsSchema = z
@@ -22,17 +26,20 @@ export const SettingsSchema = z
     name: z
       .string()
       .min(3, { message: "Name must be at least 3 characters." })
+      .max(100, { message: "Name can't be this long!" })
       .optional(),
-    image: z.optional(z.string()),
+    image: z.optional(z.string().max(1000)),
     isTwoFactorEnabled: z.boolean().optional(),
     password: z
       .string()
       .min(8, { message: "Minimum 8 characters required" })
+      .max(30, { message: "Password is too long" })
       .optional()
       .or(z.literal("")),
     newPassword: z
       .string()
       .min(8, { message: "Minimum 8 characters required" })
+      .max(30, { message: "Password is too long" })
       .optional()
       .or(z.literal("")),
   })
@@ -58,8 +65,8 @@ export const SettingsSchema = z
   );
 
 export const LoginSchema = z.object({
-  email: z.email({ message: "Please enter a valid email" }),
-  password: z.string().min(1, { message: "Password is required" }),
+  email: z.email({ message: "Please enter a valid email" }).max(255),
+  password: z.string().min(1, { message: "Password is required" }).max(50),
 });
 
 // export interface ActionResponse<T = any> {
@@ -73,12 +80,13 @@ export const LoginSchema = z.object({
 
 export type loginData = z.infer<typeof LoginSchema>;
 export const loginFormSchema = z.object({
-  email: z.email({ error: "Please enter a valid email" }),
+  email: z.email({ error: "Please enter a valid email" }).max(255),
   password: z
     .string({ error: "Password is required" })
-    .min(1, { error: "Password is required" }),
+    .min(1, { error: "Password is required" })
+    .max(50),
   "social-media-buttons": z.unknown(),
-  code: z.string().optional(),
+  code: z.string().max(6).optional(),
   twoFactorStep: z.boolean().optional(),
 });
 
@@ -87,14 +95,17 @@ export const signupFormSchema = z
   .object({
     name: z
       .string({ error: "Name is required" })
-      .min(1, { error: "Name is required" }),
-    email: z.email({ error: "Please enter a valid email" }),
+      .min(1, { error: "Name is required" })
+      .max(100),
+    email: z.email({ error: "Please enter a valid email" }).max(255),
     password: z
       .string({ error: "Password is required" })
-      .min(8, { error: "Minimum 8 characters required" }),
+      .min(8, { error: "Minimum 8 characters required" })
+      .max(30, { message: "Password is too long" }),
     "confirm-password": z
       .string({ error: "Confirm Password is required" })
-      .min(1, { error: "Confirm Password is required" }),
+      .min(1, { error: "Confirm Password is required" })
+      .max(30, { message: "Password is too long" }),
   })
   .refine((data) => data.password === data["confirm-password"], {
     message: "Passwords do not match",
@@ -102,20 +113,25 @@ export const signupFormSchema = z
   });
 
 export const verificationEmailSchema = z.object({
-  email: z.email("Please enter a valid email"),
+  email: z.email("Please enter a valid email").max(255),
 });
 
 export const resetSchema = z.object({
-  email: z.email({
-    message: "Email is required",
-  }),
+  email: z
+    .email({
+      message: "Email is required",
+    })
+    .max(255),
 });
 
 // You'll also need this for the next step:
 export const newPasswordSchema = z.object({
-  password: z.string().min(8, {
-    message: "Minimum of 8 characters required",
-  }),
+  password: z
+    .string()
+    .min(8, {
+      message: "Minimum of 8 characters required",
+    })
+    .max(30, { message: "Password is too long" }),
 });
 
 export type PostWithRelations = Prisma.PostGetPayload<{
@@ -132,19 +148,26 @@ export type PostWithRelations = Prisma.PostGetPayload<{
 }>;
 
 export const postSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters"),
+  title: z
+    .string()
+    .min(3, "Title must be at least 3 characters")
+    .max(255, { message: "Title must be less than 255 characters" }),
   slug: z
     .string()
     .min(3)
+    .max(200)
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase and hyphen separated"),
-  excerpt: z.string().min(10, "Excerpt must be at least 10 characters"),
-  content: z.string().min(10, "Content is required"),
-  image: z.string().nullable().optional(),
+  excerpt: z
+    .string()
+    .min(10, "Excerpt must be at least 10 characters")
+    .max(1000),
+  content: z.string().min(10, "Content is required").max(100000),
+  image: z.string().max(1000).nullable().optional(),
   published: z.boolean(),
   categoryIds: z.array(z.string()).min(1, "Select at least one category"),
-  seoTitle: z.string().optional(),
-  seoDescription: z.string().optional(),
-  seoKeywords: z.string().optional(),
+  seoTitle: z.string().max(255).optional(),
+  seoDescription: z.string().max(500).optional(),
+  seoKeywords: z.string().max(255).optional(),
 });
 
 export type PostInput = z.infer<typeof postSchema>;
@@ -172,16 +195,20 @@ export type CategoryWithCount = Category & {
 };
 
 export const categorySchema = z.object({
-  name: z.string().min(1, { message: "Name must be at least 1 characters" }),
+  name: z
+    .string()
+    .min(1, { message: "Name must be at least 1 characters" })
+    .max(100),
 
   slug: z
     .string()
     .min(2, { message: "Slug must be at least 2 characters" })
+    .max(100)
     .regex(/^[a-z0-9-]+$/, {
       message: "Slug must contain only lowercase letters, numbers and hyphens",
     }),
 
-  description: z.string().optional(),
+  description: z.string().max(500).optional(),
 });
 
 export type CategoryInput = z.infer<typeof categorySchema>;

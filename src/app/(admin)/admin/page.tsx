@@ -2,7 +2,7 @@ import { getDashboardAnalytics } from "@/data/admin-analytics";
 import DashboardClient from "@/components/admin/ui/dashboard-client";
 import { Metadata } from "next";
 import { SiteBreadcrumb } from "@/components/ui/breadcrumb";
-import { IconDashboard, IconReportAnalytics } from "@tabler/icons-react";
+import { IconReportAnalytics } from "@tabler/icons-react";
 
 export const metadata: Metadata = {
   title: "Admin | Dashboard",

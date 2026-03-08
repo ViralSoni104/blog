@@ -1,7 +1,7 @@
 "use client";
 
 import * as z from "zod";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
@@ -69,6 +69,11 @@ function LoginFormContent() {
     formState: { isSubmitting },
     resetField,
   } = form;
+
+  const codeValue = useWatch({
+    control: form.control,
+    name: "code",
+  });
 
   const onResendCode = async () => {
     setError("");
@@ -264,7 +269,7 @@ function LoginFormContent() {
           )}
 
           <Button
-            disabled={isSubmitting || (showTwoFactor && !form.watch("code"))}
+            disabled={isSubmitting || (showTwoFactor && !codeValue)}
             className="w-full h-12 rounded-xl mt-2 font-bold text-lg shadow-md shadow-primary/10 text-background"
           >
             {isSubmitting ? (

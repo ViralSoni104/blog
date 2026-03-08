@@ -239,7 +239,6 @@ function LinkComponent({
 const ToolBar = ({
   editor,
   fileInputRef,
-  handleImageUpload,
 }: {
   editor: Editor;
   fileInputRef: React.RefObject<HTMLInputElement>;
@@ -593,7 +592,6 @@ const ToolBar = ({
 function BubbleMenu({
   editor,
   fileInputRef,
-  handleImageUpload,
 }: {
   editor: Editor;
   fileInputRef: React.RefObject<HTMLInputElement>;
@@ -866,7 +864,6 @@ function BubbleMenu({
 function FloatingMenu({
   editor,
   fileInputRef,
-  handleImageUpload,
 }: {
   editor: Editor;
   fileInputRef: React.RefObject<HTMLInputElement>;

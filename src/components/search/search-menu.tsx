@@ -91,7 +91,7 @@ export function SearchMenu() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, posthog]);
 
   const handleSelect = (path: string) => {
     posthog.capture("search_result_clicked", {

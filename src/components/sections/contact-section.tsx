@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, color, m } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { ContainerSection } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import {

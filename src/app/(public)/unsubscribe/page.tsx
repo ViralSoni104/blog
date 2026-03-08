@@ -16,21 +16,36 @@ interface UnsubscribePageProps {
   searchParams: Promise<{ token?: string }>;
 }
 
-export default async function UnsubscribePage({
-  searchParams,
-}: UnsubscribePageProps) {
-  const { token } = await searchParams;
+// 💡 1. The Async Handler: Awaits the params AND the DB action safely inside Suspense
+async function UnsubscribeHandler({
+  searchParamsPromise,
+}: {
+  searchParamsPromise: Promise<{ token?: string }>;
+}) {
+  const { token } = await searchParamsPromise;
 
   if (!token) {
     return <Unsubscribe error="Missing token!" />;
   }
+
   const res = await unsubscribeAction(token);
+
+  return (
+    <Unsubscribe
+      success={res.success ? res.message : undefined}
+      error={!res.success ? res.message : undefined}
+    />
+  );
+}
+
+// 💡 2. The Page Shell: Removed 'async'! Renders the Suspense fallback instantly.
+export default function UnsubscribePage({
+  searchParams,
+}: UnsubscribePageProps) {
   return (
     <Suspense fallback={<Unsubscribe loading />}>
-      <Unsubscribe
-        success={res.success ? res.message : undefined}
-        error={!res.success ? res.message : undefined}
-      />
+      {/* Pass the un-awaited Promise directly to the handler */}
+      <UnsubscribeHandler searchParamsPromise={searchParams} />
     </Suspense>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useTransition } from "react";
+import { useState, useEffect, useRef, useTransition, useMemo } from "react";
 import { toast } from "sonner";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -151,7 +151,11 @@ function CommentContent({ postId, initialComments }: CommentSectionProps) {
   });
   const { data: session } = useSession();
   const isLoggedIn = !!session?.user;
-  const currentContent = form.watch("content") || "";
+  const currentContent = useWatch({
+    control: form.control,
+    name: "content",
+    defaultValue: "",
+  });
   const isMainDisabled =
     !isLoggedIn || isPending || currentContent.trim().length < 2;
   const onSubmit = form.handleSubmit((data: CommentInput) => {
@@ -174,10 +178,8 @@ function CommentContent({ postId, initialComments }: CommentSectionProps) {
   });
 
   const [sortBy, setSortBy] = useState("newest");
-  const [sortedComments, setSortedComments] = useState(initialComments);
-
-  useEffect(() => {
-    const sorted = [...initialComments].sort((a, b) => {
+  const sortedComments = useMemo(() => {
+    return [...initialComments].sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
       const dateB = new Date(b.createdAt).getTime();
 
@@ -194,7 +196,6 @@ function CommentContent({ postId, initialComments }: CommentSectionProps) {
           return 0;
       }
     });
-    setSortedComments(sorted);
   }, [initialComments, sortBy]);
 
   return (
@@ -327,7 +328,11 @@ function ThreadItem({
     }
   }, [isReplying]);
 
-  const currentReply = replyForm.watch("content") || "";
+  const currentReply = useWatch({
+    control: replyForm.control,
+    name: "content",
+    defaultValue: "",
+  });
   const strippedReply = currentReply.replace(/(@[a-zA-Z0-9_]+)/g, "").trim();
   const isReplyDisabled = !isLoggedIn || isPending || strippedReply.length < 2;
 
@@ -494,7 +499,11 @@ function CommentCard({
     defaultValues: { commentId: data.id, content: data.content },
   });
 
-  const currentEdit = editForm.watch("content") || "";
+  const currentEdit = useWatch({
+    control: editForm.control,
+    name: "content",
+    defaultValue: "",
+  });
   const isEditDisabled = isPending || currentEdit.trim().length < 2;
 
   const onEditSubmit = editForm.handleSubmit((values: UpdateCommentInput) => {
@@ -513,7 +522,11 @@ function CommentCard({
     defaultValues: { commentId: data.id, reason: "" },
   });
 
-  const currentReport = reportForm.watch("reason") || "";
+  const currentReport = useWatch({
+    control: reportForm.control,
+    name: "reason",
+    defaultValue: "",
+  });
   const isReportDisabled = isPending || currentReport.trim().length < 10;
 
   const onReportSubmit = reportForm.handleSubmit(

@@ -3,7 +3,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
-  output: "standalone",
   cacheComponents: true,
   experimental: {
     // Enable the Next 15 "use cache" directive

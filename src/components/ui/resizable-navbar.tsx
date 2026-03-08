@@ -153,7 +153,6 @@ export const MobileNavMenu = ({
   children,
   className,
   isOpen,
-  onClose,
 }: MobileNavMenuProps) => {
   React.useEffect(() => {
     if (isOpen) {

@@ -1,6 +1,6 @@
 "use client";
 import { useTransition, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { postSchema, PostInput } from "@/schemas";
 import { createPost, updatePost } from "@/actions/(admin)/post-action";
@@ -74,6 +74,11 @@ export default function PostForm({ initialData, categories }: Props) {
       seoDescription: initialData?.seoDescription ?? "",
       seoKeywords: initialData?.seoKeywords ?? "",
     },
+  });
+
+  const imageValue = useWatch({
+    control: form.control,
+    name: "image",
   });
 
   const slugify = (text: string): string =>
@@ -233,11 +238,11 @@ export default function PostForm({ initialData, categories }: Props) {
           }}
         />
 
-        {form.watch("image") && (
+        {imageValue && (
           // 💡 Wrapped in a relative container to use 'fill' just like your other components
           <div className="relative w-40 aspect-video mt-2 overflow-hidden rounded-md border border-border/30 shadow-sm">
             <Image
-              src={form.watch("image") as string}
+              src={imageValue as string}
               alt="Featured Image Preview"
               fill
               sizes="160px"
