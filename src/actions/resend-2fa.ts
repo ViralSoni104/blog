@@ -29,7 +29,7 @@ export const resendTwoFactorCode = async (email: string | undefined) => {
 
   // 3. Generate and Send
   const twoFactorToken = await generateTwoFactorToken(existingUser.email!);
-  sendTwoFactorTokenEmail(twoFactorToken.email, twoFactorToken.token);
+  await sendTwoFactorTokenEmail(twoFactorToken.email, twoFactorToken.token);
 
   return { success: true, message: "A new verification code has been sent." };
 };
