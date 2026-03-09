@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import {
   commentSchema,
   updateCommentSchema,
@@ -73,7 +73,7 @@ export async function getCommentsTree(
 }
 
 // --- 💡 2. USE ZOD INPUTS IN ACTIONS ---
-export async function addComment(input: CommentInput) {
+export async function addComment(input: CommentInput, pathname: string) {
   const user = await currentUser();
   if (!user?.id) return { success: false, message: "Unauthorized" };
 
@@ -101,17 +101,17 @@ export async function addComment(input: CommentInput) {
         parentId: parsed.data.parentId || null,
       },
     });
-    revalidateTag(`comments-${parsed.data.postId}`, "max");
-    revalidateTag(`stats-${parsed.data.postId}`, "max");
-    revalidateTag("comments", "max");
-    revalidatePath("/", "layout");
+    updateTag(`comments-${parsed.data.postId}`);
+    updateTag(`stats-${parsed.data.postId}`);
+    updateTag("comments");
+    revalidatePath(pathname);
     return { success: true };
   } catch {
     return { success: false, message: "Failed to post comment." };
   }
 }
 
-export async function editComment(input: UpdateCommentInput) {
+export async function editComment(input: UpdateCommentInput, pathname: string) {
   const user = await currentUser();
   if (!user?.id) return { success: false, message: "Unauthorized" };
 
@@ -143,17 +143,20 @@ export async function editComment(input: UpdateCommentInput) {
       where: { id: parsed.data.commentId },
       data: { content: parsed.data.content.trim() },
     });
-    revalidateTag(`comments-${comment.postId}`, "max");
-    revalidateTag(`stats-${comment.postId}`, "max");
-    revalidateTag("comments", "max");
-    revalidatePath("/", "layout");
+    updateTag(`comments-${comment.postId}`);
+    updateTag(`stats-${comment.postId}`);
+    updateTag("comments");
+    revalidatePath(pathname);
     return { success: true };
   } catch {
     return { success: false, message: "Failed to edit comment." };
   }
 }
 
-export async function reportComment(input: ReportCommentInput) {
+export async function reportComment(
+  input: ReportCommentInput,
+  pathname: string,
+) {
   const user = await currentUser();
   if (!user?.id) return { success: false, message: "Unauthorized" };
 
@@ -201,8 +204,8 @@ export async function reportComment(input: ReportCommentInput) {
         reason: parsed.data.reason,
       },
     });
-    revalidateTag("comments", "max");
-    revalidatePath("/", "layout");
+    updateTag("comments");
+    revalidatePath(pathname);
     return {
       success: true,
       message: "Comment reported. Thank you for keeping the community safe.",
@@ -215,7 +218,7 @@ export async function reportComment(input: ReportCommentInput) {
   }
 }
 
-export async function deleteComment(commentId: string) {
+export async function deleteComment(commentId: string, pathname: string) {
   const user = await currentUser();
   if (!user?.id) return { success: false, message: "Unauthorized" };
 
@@ -230,10 +233,10 @@ export async function deleteComment(commentId: string) {
 
     await db.comment.delete({ where: { id: commentId } });
 
-    revalidateTag(`comments-${comment.postId}`, "max");
-    revalidateTag("comments", "max");
-    revalidateTag(`stats-${comment.postId}`, "max");
-    revalidatePath("/", "layout");
+    updateTag(`comments-${comment.postId}`);
+    updateTag("comments");
+    updateTag(`stats-${comment.postId}`);
+    revalidatePath(pathname);
     return { success: true };
   } catch {
     return { success: false, message: "Failed to delete comment." };

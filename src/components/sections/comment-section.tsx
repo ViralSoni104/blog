@@ -61,7 +61,7 @@ import {
 } from "@tabler/icons-react";
 import { cn, getInitials, getRelativeTime } from "@/lib/utils";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   Select,
@@ -145,7 +145,6 @@ function CommentContent({ postId, initialComments }: CommentSectionProps) {
   const [isPending, startTransition] = useTransition();
   const pathname = usePathname();
   const posthog = usePostHog();
-  const router = useRouter();
   const form = useForm<CommentInput>({
     resolver: zodResolver(commentSchema),
     defaultValues: { content: "", postId, parentId: null },
@@ -165,11 +164,10 @@ function CommentContent({ postId, initialComments }: CommentSectionProps) {
         position: "top-center",
       });
     startTransition(async () => {
-      const res = await addComment(data);
+      const res = await addComment(data, pathname);
       if (res.success) {
         toast.success("Comment posted!", { position: "top-center" });
         form.reset();
-        router.refresh();
         posthog.capture("comment_posted", {
           article_id: postId,
           is_reply: false,
@@ -251,7 +249,7 @@ function CommentContent({ postId, initialComments }: CommentSectionProps) {
                 type="submit"
                 disabled={isMainDisabled}
                 size="sm"
-                className="rounded-full h-8 px-5 text-xs font-semibold"
+                className="rounded-full h-8 px-5 text-xs font-semibold min-w-[100px]"
               >
                 {isPending ? "Publishing..." : "Respond"}
               </Button>
@@ -314,10 +312,11 @@ function ThreadItem({
   const [showReplies, setShowReplies] = useState(false);
   const [isPending, startTransition] = useTransition();
   const posthog = usePostHog();
-  const router = useRouter();
+  const pathname = usePathname();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { data: session } = useSession();
   const isLoggedIn = !!session?.user;
+  const [prevReplyCount, setPrevReplyCount] = useState(comment.replies.length);
   const replyForm = useForm<CommentInput>({
     resolver: zodResolver(commentSchema),
     defaultValues: { content: "", postId, parentId: comment.id },
@@ -331,6 +330,12 @@ function ThreadItem({
     }
   }, [isReplying]);
 
+  if (comment.replies.length > prevReplyCount) {
+    setPrevReplyCount(comment.replies.length);
+    setIsReplying(false);
+    setShowReplies(true);
+  }
+
   const currentReply = useWatch({
     control: replyForm.control,
     name: "content",
@@ -343,12 +348,10 @@ function ThreadItem({
     if (!isLoggedIn)
       return toast.error("Please log in.", { position: "top-center" });
     startTransition(async () => {
-      const res = await addComment(data);
+      const res = await addComment(data, pathname);
       if (res.success) {
         replyForm.reset();
-        router.refresh();
-        setIsReplying(false);
-        setShowReplies(true);
+        toast.success("Reply posted!", { position: "top-center" });
         posthog.capture("comment_posted", {
           article_id: postId,
           is_reply: true,
@@ -440,7 +443,7 @@ function ThreadItem({
                 disabled={isReplyDisabled}
                 className="rounded-full h-7 px-4 text-xs"
               >
-                {isPending ? "..." : "Reply"}
+                {isPending ? "Replying..." : "Reply"}
               </Button>
             </div>
           </form>
@@ -492,8 +495,9 @@ function CommentCard({
   const [isEditing, setIsEditing] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [isDeleting, setIsDeleting] = useState(false);
   const { data: session } = useSession();
-  const router = useRouter();
+  const pathname = usePathname();
   const isLoggedIn = !!session?.user;
   const currentUserId = session?.user?.id;
   const isOwner = currentUserId === data.user.id;
@@ -513,10 +517,9 @@ function CommentCard({
 
   const onEditSubmit = editForm.handleSubmit((values: UpdateCommentInput) => {
     startTransition(async () => {
-      const res = await editComment(values);
+      const res = await editComment(values, pathname);
       if (res.success) {
         setIsEditing(false);
-        router.refresh();
         toast.success("Comment updated!", { position: "top-center" });
       } else toast.error(res.message, { position: "top-center" });
     });
@@ -538,7 +541,7 @@ function CommentCard({
   const onReportSubmit = reportForm.handleSubmit(
     (values: ReportCommentInput) => {
       startTransition(async () => {
-        const res = await reportComment(values);
+        const res = await reportComment(values, pathname);
         if (res.success) {
           toast.success(res.message, { position: "top-center" });
           setIsReportOpen(false);
@@ -547,9 +550,26 @@ function CommentCard({
       });
     },
   );
-
+  const onDeleteSubmit = async () => {
+    setIsDeleting(true);
+    const res = await deleteComment(data.id, pathname);
+    if (res.success) {
+      toast.success("Comment deleted!", {
+        position: "top-center",
+      });
+    } else {
+      setIsDeleting(false); // Only revert if it fails
+      toast.error(res.message, { position: "top-center" });
+    }
+  };
   return (
-    <div className="flex gap-3 w-full group">
+    <div
+      className={cn(
+        "flex gap-3 w-full group transition-all duration-300",
+        isDeleting &&
+          "opacity-40 blur-[1px] scale-[0.98] pointer-events-none grayscale",
+      )}
+    >
       <Avatar className="size-8 shrink-0 mt-0.5">
         <AvatarImage
           src={data.user.image || undefined}
@@ -589,13 +609,7 @@ function CommentCard({
                       <IconEdit size={14} className="mr-2" /> Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => {
-                        deleteComment(data.id);
-                        router.refresh();
-                        toast.success("Comment deleted!", {
-                          position: "top-center",
-                        });
-                      }}
+                      onClick={onDeleteSubmit}
                       className="text-destructive focus:text-destructive"
                     >
                       <IconTrash size={14} className="mr-2" /> Delete
@@ -644,7 +658,7 @@ function CommentCard({
                   disabled={isEditDisabled}
                   className="rounded-full h-7 px-4 text-xs"
                 >
-                  Save
+                  {isPending ? "Saving..." : "Save"}
                 </Button>
               </div>
             </form>

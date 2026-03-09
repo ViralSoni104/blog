@@ -16,7 +16,7 @@ interface Props {
 }
 export default function Hero({ latestArticleSlug }: Props) {
   return (
-    <ContainerSection className="h-full min-h-[calc(100svh-5.5rem)] md:min-h-0 relative md:mt-0 md:py-8 flex flex-col items-center justify-center gap-10 md:gap-8 border-none">
+    <ContainerSection className="h-full min-h-[calc(100svh-5.5rem)] md:min-h-0 relative mt-5 py-8 flex flex-col items-center justify-center gap-10 md:gap-8 border-none">
       {/* Top Metadata */}
 
       <div

@@ -44,6 +44,7 @@ export default {
   ],
   pages: {
     signIn: "/auth/login",
+    error: "/auth/login",
   },
   events: {
     async linkAccount({ user }) {

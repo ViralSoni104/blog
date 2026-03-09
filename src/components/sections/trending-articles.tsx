@@ -33,7 +33,7 @@ export default function TrendingArticles({ articles }: TrendingArticlesProps) {
       </m.div>
 
       {/* Grid: No stagger here so they act independently based on scroll position */}
-      <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         {articles.length > 0 ? (
           articles.map((article, index) => (
             <ArticleCard

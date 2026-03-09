@@ -41,7 +41,6 @@ export function ArticleCard({
   const posthog = usePostHog();
   const nav = useRouter();
   const pathname = usePathname();
-  // 💡 FIX: Destructure the actual session data from the hook
   const { data: session } = useSession();
 
   const handleBookmark = async (e: React.MouseEvent) => {
@@ -61,7 +60,6 @@ export function ArticleCard({
       const result = await toggleBookmark(article.id, action);
 
       if (result.success) {
-        // 💡 BROADCAST: Tell all other cards with this ID to update
         window.dispatchEvent(
           new CustomEvent("article-bookmark-update", {
             detail: { id: article.id, status: nextStatus },
@@ -111,7 +109,6 @@ export function ArticleCard({
       window.removeEventListener("article-bookmark-update", handleGlobalUpdate);
   }, [article.id]);
 
-  // 💡 NEW: Using the relative time utility
   const formattedDate = article.createdAt
     ? getRelativeTime(new Date(article.createdAt))
     : "just now";
@@ -121,13 +118,11 @@ export function ArticleCard({
       {...motionProps}
       id={id}
       className={cn(
-        // 💡 UPGRADE: Lift & Glow hover, overflow-hidden for edge-to-edge images
         "group scroll-mt-24 relative flex overflow-hidden transition-all duration-300 ease-out",
         "bg-card border border-muted-foreground/20 hover:border-primary/30",
         "hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5",
         "rounded-2xl md:rounded-3xl",
-        // In grid mode, we use flex-col. In list mode, we use flex-row with padding
-        variant === "grid" ? "flex-col" : "flex-col md:flex-row gap-2 md:gap-5",
+        variant === "grid" ? "flex-col" : "flex-col md:flex-row gap-2 md:gap-4",
       )}
     >
       <BorderBeam
@@ -136,7 +131,6 @@ export function ArticleCard({
         className="opacity-0 transition-opacity duration-300 group-hover:opacity-100"
       />
 
-      {/* 💡 UPGRADE: Edge-to-Edge Image Container */}
       <div
         className={cn(
           "relative shrink-0 overflow-hidden bg-muted/30",
@@ -155,27 +149,26 @@ export function ArticleCard({
         />
       </div>
 
-      {/* Content Section (Padding applied here so image stays flush with edges) */}
       <div
         className={cn(
           "flex flex-1 flex-col",
-          variant === "grid" ? "p-4 md:p-6" : "py-2 pr-2 md:px-0 px-3",
+          variant === "grid"
+            ? "p-4 md:p-6"
+            : "py-2 pr-2 md:pl-0.5 md:pr-3 px-3",
         )}
       >
-        {/* Meta Info */}
-        <div className="flex items-center gap-2 mt-1 mb-3">
+        <div className="flex items-center gap-2 mt-1 mb-3 shrink-0">
           {article.categories?.[0] && (
             <div className="bg-primary px-2 py-0.5 rounded text-[10px] font-bold text-primary-foreground uppercase tracking-wider">
               {article.categories[0].name}
             </div>
           )}
           <span className="text-[10px] text-muted-foreground/50">•</span>
-          <span className="text-[11px] font-medium text-muted-foreground tracking-tight capitalize">
+          <span className="text-[11px] font-medium text-muted-foreground tracking-tight capitalize whitespace-nowrap">
             {formattedDate}
           </span>
         </div>
 
-        {/* 💡 UPGRADE: Text-Balance Title */}
         <h3 className="font-bold leading-tight tracking-tight text-balance transition-colors group-hover:text-primary text-xl md:text-2xl mb-2">
           <Link
             href={`/articles/${article.slug}`}
@@ -189,15 +182,23 @@ export function ArticleCard({
           {article.excerpt}
         </p>
 
-        {/* 💡 ORIGINAL FOOTER: Kept exactly as you designed it! */}
-        <div className="mt-auto flex md:flex-row flex-col md:items-center items-end md:gap-0 gap-1 justify-between pt-4 border-t border-dashed border-border/60">
-          <div className="flex md:justify-start justify-between w-full items-center gap-4 relative z-10">
-            <div className="bg-muted/30 text-muted-foreground inline-flex items-center gap-1 rounded p-1 text-xs font-medium outline outline-[var(--border)]/30">
-              <IconHourglassEmpty size={14} className="text-primary" />
+        {/* 💡 THE FIX: Conditionally Responsive Footer */}
+        <div className="mt-auto flex flex-row items-center justify-between pt-4 border-t border-dashed border-border/60 w-full gap-2">
+          <div
+            className={cn(
+              "flex items-center gap-2 sm:gap-4 relative z-10 shrink-0",
+              variant === "grid"
+                ? "justify-between w-full xl:w-auto xl:justify-start" // Grid: w-full & justify-between until 1280px
+                : "justify-between w-full sm:w-auto sm:justify-start", // List: original behavior
+            )}
+          >
+            <div className="bg-muted/30 text-muted-foreground inline-flex items-center gap-1 rounded p-1 sm:px-2 text-[11px] sm:text-xs font-medium outline outline-[var(--border)]/30 shrink-0 whitespace-nowrap">
+              <IconHourglassEmpty size={14} className="text-primary shrink-0" />
               <span>{article.readingTime}m Read</span>
             </div>
+
             <Button
-              className="text-muted-foreground hover:bg-transparent cursor-pointer transition-colors"
+              className="text-muted-foreground hover:bg-transparent cursor-pointer transition-colors h-8 w-8 px-0 shrink-0"
               variant="ghost"
               disabled={isPending}
               onClick={handleBookmark}
@@ -213,12 +214,17 @@ export function ArticleCard({
           <Button
             variant="ghost"
             size="sm"
-            className="md:flex hidden group/btn relative z-10 h-8 px-0 text-xs font-bold uppercase tracking-widest text-primary hover:bg-transparent pointer-events-none"
+            className={cn(
+              "group/btn relative z-10 h-8 px-0 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-primary hover:bg-transparent pointer-events-none shrink-0",
+              variant === "grid"
+                ? "hidden xl:flex" // Grid: Hide Read More until 1280px
+                : "hidden sm:flex", // List: Hide Read More only on mobile
+            )}
           >
             Read More
             <IconChevronsRight
               size={16}
-              className="ml-0 transition-transform group-hover/btn:translate-x-0.5"
+              className="ml-0 transition-transform group-hover/btn:translate-x-0.5 shrink-0"
             />
           </Button>
         </div>
