@@ -19,6 +19,7 @@ async function getCachedPublicPosts(
   categorySlug: string,
 ) {
   "use cache";
+  if (page === 1) cacheTag("homepage");
   cacheTag("posts", `infinite-posts-${categorySlug}-${page}-${limit}`);
   cacheLife("hours");
 
@@ -122,7 +123,7 @@ export async function getPopularCategories(limit: number = 8) {
 
 async function getCachedTrendingPosts(limit: number) {
   "use cache";
-  cacheTag("posts", "trending");
+  cacheTag("posts", "trending", "homepage");
   cacheLife("hours");
 
   return await db.post.findMany({

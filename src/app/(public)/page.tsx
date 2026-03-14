@@ -24,14 +24,23 @@ export default function Page() {
 
 async function DynamicHomeContent() {
   // Fetch user and data inside the Suspended component
-  const user = await currentUser();
+  // const user = await currentUser();
 
+  // const [postsRes, popularCategories, trendingPosts] = await Promise.all([
+  //   getInfinitePosts(1, 12, "All", user?.id),
+  //   getPopularCategories(8),
+  //   getTrendingPosts(6, user?.id),
+  // ]);
+  const popularCategoriesPromise = getPopularCategories(8);
+  const user = await currentUser();
   const [postsRes, popularCategories, trendingPosts] = await Promise.all([
     getInfinitePosts(1, 12, "All", user?.id),
-    getPopularCategories(8),
+    popularCategoriesPromise,
     getTrendingPosts(6, user?.id),
   ]);
-
+  if (!postsRes?.data || postsRes.data.length === 0) {
+    return <div className="py-20 text-center">No articles found.</div>;
+  }
   return (
     <>
       <Hero latestArticleSlug={postsRes.data[0]!.slug} />
